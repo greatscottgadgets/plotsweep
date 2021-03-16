@@ -4,6 +4,7 @@ use std::io;
 use std::process;
 
 use chrono::naive::{NaiveDateTime, NaiveDate, NaiveTime};
+use clap::{Arg, App, value_t};
 use image::{Rgb, RgbImage};
 use serde::Deserialize;
 
@@ -42,7 +43,7 @@ mod custom_time {
     }
 }
 
-fn example() -> Result<(), Box<dyn Error>> {
+fn heatmap(output_path: &str, power_min: f32, power_max: f32) -> Result<(), Box<dyn Error>> {
     let mut rdr = csv::ReaderBuilder::new()
         .has_headers(false)
         .trim(csv::Trim::All)
@@ -74,7 +75,6 @@ fn example() -> Result<(), Box<dyn Error>> {
         }
         timestamps.insert(NaiveDateTime::new(record.date, record.time));
         records.push(record);
-        //println!("{:?}", record);
     }
     let step = step.unwrap();
 
@@ -92,24 +92,41 @@ fn example() -> Result<(), Box<dyn Error>> {
     for record in records {
         let mut x = ((record.freq_low - min) as f32 / step) as u32;
         let y = timestamps[&NaiveDateTime::new(record.date, record.time)];
-        let min_power = -60f32;
-        let max_power = -40f32;
-        let range = max_power - min_power;
+        let range = power_max - power_min;
         let scale = 1f32 / range;
         for sample in record.samples {
-            let scaled_pixel = (sample - min_power) * scale;
+            let scaled_pixel = (sample - power_min) * scale;
             let value = (scaled_pixel.clamp(0f32, 1f32) * 255f32) as u8;
             img.put_pixel(x, y, Rgb([value, 0, 0]));
             x += 1
         }
     }
-    img.save("test.png")?;
+    img.save(output_path)?;
     Ok(())
 }
 
 fn main() {
-    if let Err(err) = example() {
-        println!("error running example: {}", err);
+    let matches = App::new("heatmap")
+        .arg(Arg::with_name("OUTPUT")
+             .required(true))
+        .arg(Arg::with_name("power-min")
+             .long("power-min")
+             .takes_value(true)
+             .allow_hyphen_values(true)
+             .default_value("-70"))
+        .arg(Arg::with_name("power-max")
+             .long("power-max")
+             .takes_value(true)
+             .allow_hyphen_values(true)
+             .default_value("-30"))
+        .get_matches();
+
+    let output_path = matches.value_of("OUTPUT").unwrap();
+    let power_min = value_t!(matches, "power-min", f32).unwrap_or_else(|e| e.exit());
+    let power_max = value_t!(matches, "power-max", f32).unwrap_or_else(|e| e.exit());
+
+    if let Err(err) = heatmap(output_path, power_min, power_max) {
+        println!("error running heatmap: {}", err);
         process::exit(1);
     }
 }
