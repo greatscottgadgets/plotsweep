@@ -57,6 +57,11 @@ fn example() -> Result<(), Box<dyn Error>> {
     let mut step: Option<f32> = None;
     let mut timestamps = HashSet::new();
     for result in rdr.deserialize() {
+        // Break out on error and try to continue processing, for cases where the CSV is still being written
+        if let Err(e) = result {
+            println!("Warning: {}", e);
+            break;
+        }
         let record: Record = result?;
         min = std::cmp::min(min, record.freq_low);
         max = std::cmp::max(max, record.freq_high);
