@@ -95,6 +95,7 @@ fn example() -> Result<(), Box<dyn Error>> {
             let scaled_pixel = (sample - min_power) * scale;
             let value = (scaled_pixel.clamp(0f32, 1f32) * 255f32) as u8;
             img.put_pixel(x, y, Rgb([value, 0, 0]));
+            x += 1
         }
     }
     img.save("test.png")?;
