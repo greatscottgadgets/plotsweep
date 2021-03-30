@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
-use std::io;
+use std::fs::File;
 use std::process;
 
 use chrono::naive::{NaiveDateTime, NaiveDate, NaiveTime};
@@ -43,11 +43,12 @@ mod custom_time {
     }
 }
 
-fn heatmap(output_path: &str, power_min: f32, power_max: f32) -> Result<(), Box<dyn Error>> {
+fn heatmap(input_path: &str, output_path: &str, power_min: f32, power_max: f32) -> Result<(), Box<dyn Error>> {
+    let input = File::open(input_path)?;
     let mut rdr = csv::ReaderBuilder::new()
         .has_headers(false)
         .trim(csv::Trim::All)
-        .from_reader(io::stdin());
+        .from_reader(input);
 
     // Loop through all lines & parse records
     // also keep track of frequency range & unique timestamps to determine final image size
@@ -107,6 +108,8 @@ fn heatmap(output_path: &str, power_min: f32, power_max: f32) -> Result<(), Box<
 
 fn main() {
     let matches = App::new("heatmap")
+        .arg(Arg::with_name("INPUT")
+             .required(true))
         .arg(Arg::with_name("OUTPUT")
              .required(true))
         .arg(Arg::with_name("power-min")
@@ -121,11 +124,12 @@ fn main() {
              .default_value("-30"))
         .get_matches();
 
+    let input_path = matches.value_of("INPUT").unwrap();
     let output_path = matches.value_of("OUTPUT").unwrap();
     let power_min = value_t!(matches, "power-min", f32).unwrap_or_else(|e| e.exit());
     let power_max = value_t!(matches, "power-max", f32).unwrap_or_else(|e| e.exit());
 
-    if let Err(err) = heatmap(output_path, power_min, power_max) {
+    if let Err(err) = heatmap(input_path, output_path, power_min, power_max) {
         println!("error running heatmap: {}", err);
         process::exit(1);
     }
