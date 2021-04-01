@@ -50,15 +50,15 @@ pub fn draw_image(record_collection: &RecordCollection, output_path: &str, setti
 
     let mut img = RgbImage::new(width, height);
 
-    let range = settings.power_max - settings.power_min;
-    let scale = u16::MAX as f32 / range;
     let lut = build_lut(settings.colormap);
+    let range = settings.power_max - settings.power_min;
+    let scale = (lut.len()-1) as f32 / range;
     for record in &rc.records {
         let mut x = ((record.freq_low - rc.freq_low) as f32 / rc.freq_step) as u32;
         let y = rc.timestamps[&NaiveDateTime::new(record.date, record.time)];
         for sample in &record.samples {
             let scaled_pixel = (sample - settings.power_min) * scale;
-            let value = lut[(scaled_pixel as usize).clamp(0, u16::MAX as usize)];
+            let value = lut[(scaled_pixel as usize).clamp(0, lut.len()-1)];
             img.put_pixel(x, y, Rgb([value.int_r(), value.int_g(), value.int_b()]));
             x += 1
         }
