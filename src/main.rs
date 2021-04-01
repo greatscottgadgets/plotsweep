@@ -1,6 +1,6 @@
 use std::error::Error;
 use std::process;
-use clap::{Arg, App, value_t};
+use clap::{Arg, App, crate_version, value_t};
 
 mod csv;
 mod draw;
@@ -19,6 +19,8 @@ fn heatmap(input_path: &str, output_path: &str, power_min: f32, power_max: f32, 
 
 fn main() {
     let matches = App::new("heatmap")
+        .about("Plots spectrogram from hackrf_sweep, soapy_power, or rtl_power output.")
+        .version(crate_version!())
         .arg(Arg::with_name("INPUT")
              .required(true))
         .arg(Arg::with_name("OUTPUT")
