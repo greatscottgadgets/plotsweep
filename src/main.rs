@@ -1,11 +1,17 @@
 use std::error::Error;
 use std::process;
-use clap::{Arg, App, crate_version, value_t};
+use clap::{Arg, ArgMatches, App, crate_version, value_t};
 
 mod csv;
 mod draw;
 
-fn heatmap(input_path: &str, output_path: &str, power_min: f32, power_max: f32, colormap: &str) -> Result<(), Box<dyn Error>> {
+fn heatmap(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
+    let input_path = matches.value_of("INPUT").unwrap();
+    let output_path = matches.value_of("OUTPUT").unwrap();
+    let power_min = value_t!(matches, "power-min", f32).unwrap_or_else(|e| e.exit());
+    let power_max = value_t!(matches, "power-max", f32).unwrap_or_else(|e| e.exit());
+    let colormap = matches.value_of("colormap").unwrap();
+
     let rc = csv::load_records(input_path)?;
     let maps = draw::colormaps();
     let settings = draw::DrawSettings{
@@ -41,13 +47,7 @@ fn main() {
              .default_value("viridis"))
         .get_matches();
 
-    let input_path = matches.value_of("INPUT").unwrap();
-    let output_path = matches.value_of("OUTPUT").unwrap();
-    let power_min = value_t!(matches, "power-min", f32).unwrap_or_else(|e| e.exit());
-    let power_max = value_t!(matches, "power-max", f32).unwrap_or_else(|e| e.exit());
-    let colormap = matches.value_of("colormap").unwrap();
-
-    if let Err(err) = heatmap(input_path, output_path, power_min, power_max, colormap) {
+    if let Err(err) = heatmap(&matches) {
         println!("error running heatmap: {}", err);
         process::exit(1);
     }
