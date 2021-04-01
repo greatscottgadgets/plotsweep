@@ -33,6 +33,14 @@ pub fn colormaps() -> HashMap<&'static str, Box<dyn MyColorMap>> {
     maps
 }
 
+fn build_lut(colormap: &Box<dyn MyColorMap>) -> Vec<RGBColor> {
+    let mut lut = Vec::with_capacity(u16::MAX as usize + 1);
+    for i in 0..u16::MAX as usize + 1 {
+        lut.push(colormap.transform_single(i as f64 / u16::MAX as f64));
+    }
+    lut
+}
+
 pub fn draw_image(record_collection: &RecordCollection, output_path: &str, settings: &DrawSettings) -> Result<(), Box<dyn Error>> {
     let rc = record_collection; 
 
@@ -43,13 +51,14 @@ pub fn draw_image(record_collection: &RecordCollection, output_path: &str, setti
     let mut img = RgbImage::new(width, height);
 
     let range = settings.power_max - settings.power_min;
-    let scale = 1f32 / range;
+    let scale = u16::MAX as f32 / range;
+    let lut = build_lut(settings.colormap);
     for record in &rc.records {
         let mut x = ((record.freq_low - rc.freq_low) as f32 / rc.freq_step) as u32;
         let y = rc.timestamps[&NaiveDateTime::new(record.date, record.time)];
         for sample in &record.samples {
             let scaled_pixel = (sample - settings.power_min) * scale;
-            let value = settings.colormap.transform_single(scaled_pixel as f64);
+            let value = lut[(scaled_pixel as usize).clamp(0, u16::MAX as usize)];
             img.put_pixel(x, y, Rgb([value.int_r(), value.int_g(), value.int_b()]));
             x += 1
         }
