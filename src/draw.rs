@@ -3,6 +3,9 @@ use std::collections::HashMap;
 
 use chrono::naive::NaiveDateTime;
 use image::{Rgb, RgbImage};
+use imageproc::drawing::{draw_filled_rect_mut, draw_text_mut};
+use imageproc::rect::Rect;
+use rusttype::{Font, Scale};
 pub use scarlet::colormap::{ColorMap, ListedColorMap};
 use scarlet::color::RGBColor;
 
@@ -12,6 +15,7 @@ pub struct DrawSettings<'a> {
     pub colormap: &'a Box<dyn MyColorMap>,
     pub power_min: f32,
     pub power_max: f32,
+    pub timestamps: bool,
 }
 
 pub trait MyColorMap {
@@ -63,6 +67,33 @@ pub fn draw_image(record_collection: &RecordCollection, output_path: &str, setti
             let value = lut[(scaled_pixel as usize).clamp(0, lut.len()-1)];
             img.put_pixel(x, y, Rgb(value));
             x += 1
+        }
+    }
+
+    if settings.timestamps {
+        // TODO: load a font properly
+        let font = Vec::from(include_bytes!("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf") as &[u8]);
+        let font = Font::try_from_vec(font).unwrap();
+
+        let height = 20.0;
+        let scale = Scale{
+            x: height * 1.5,
+            y: height,
+        };
+
+        // Draw timestamps
+        let mut timestamps = rc.timestamps.keys().collect::<Vec<_>>();
+        timestamps.sort();
+        for ts in timestamps.iter().skip(100).step_by(200) {
+            let white = Rgb([255u8,255u8,255u8]);
+            let black = Rgb([0u8, 0u8, 0u8]);
+            let x = 10;
+            let y = rc.timestamps[ts];
+            let text = &ts.to_string();
+            let h = scale.y as u32;
+            draw_filled_rect_mut(&mut img, Rect::at(0, y as i32).of_size(20, 2), white);
+            draw_text_mut(&mut img, black, x+2, y-h+2, scale, &font, text);
+            draw_text_mut(&mut img, white, x, y-h, scale, &font, text);
         }
     }
     img.save(output_path)?;
