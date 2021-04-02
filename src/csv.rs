@@ -56,7 +56,7 @@ pub fn load_records(input_path: &str) -> Result<RecordCollection, Box<dyn Error>
         .trim(csv::Trim::All)
         .from_reader(input);
 
-    let mut rc = RecordCollection{ ..Default::default() };
+    let mut rc = RecordCollection{ freq_low: u64::MAX, ..Default::default() };
 
     // Loop through all lines & parse records
     // also keep track of frequency range & unique timestamps to determine final image size
