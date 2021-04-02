@@ -53,7 +53,7 @@ pub fn draw_image(record_collection: &RecordCollection, output_path: &str, setti
     let margins = if settings.hide_axes {
         (0, 0)
     } else {
-        (150, 35)
+        (150, 40)
     };
 
     let b = BitMapBackend::new(output_path, (width+margins.0*2, height+margins.1*2))
@@ -80,6 +80,8 @@ pub fn draw_image(record_collection: &RecordCollection, output_path: &str, setti
             .build_cartesian_2d::<_, _>(rc.freq_low..rc.freq_high, y_axis)?;
         chart
             .configure_mesh()
+            .x_desc("Frequency (MHz)")
+            .x_label_formatter(&|&x| (x as f32/1e6).round().to_string())
             .draw()?;
 
         chart.plotting_area().strip_coord_spec()
