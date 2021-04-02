@@ -4,6 +4,7 @@ use clap::{Arg, ArgMatches, App, crate_version, value_t};
 
 mod csv;
 mod draw;
+mod coord;
 
 fn heatmap(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
     let input_path = matches.value_of("INPUT").unwrap();
@@ -18,7 +19,7 @@ fn heatmap(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
         colormap: &maps[colormap],
         power_min: power_min,
         power_max: power_max,
-        timestamps: matches.is_present("timestamps"),
+        hide_axes: matches.is_present("hide_axes"),
     };
     draw::draw_image(&rc, output_path, &settings)?;
     Ok(())
@@ -36,6 +37,10 @@ fn main() {
              .long("colormap")
              .possible_values(&draw::colormaps().keys().map(|&x| x).collect::<Vec<_>>())
              .default_value("viridis"))
+        .arg(Arg::with_name("hide_axes")
+                  .help("Hide axes")
+                  .long("hide-axes")
+                  .takes_value(false))
         .arg(Arg::with_name("power-min")
              .long("power-min")
              .takes_value(true)
@@ -46,11 +51,6 @@ fn main() {
              .takes_value(true)
              .allow_hyphen_values(true)
              .default_value("-30"))
-        .arg(Arg::with_name("timestamps")
-             .help("Draw timestamps")
-             .short("t")
-             .long("timestamps")
-             .takes_value(false))
         .get_matches();
 
     if let Err(err) = heatmap(&matches) {

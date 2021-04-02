@@ -13,9 +13,6 @@ debug = true
 chrono = "*"
 clap = "2"
 csv = "1.1"
-image = "0.23"
-imageproc = "0.22"
 plotters = "0.3"
-rusttype = "0.9"
 scarlet = "1.1"
 serde = { version = "1", features = ["derive"] }
