@@ -1,0 +1,48 @@
+on: [push]
+
+name: CI
+
+jobs:
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install stable components
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: clippy
+
+      - name: Run clippy
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --verbose --release -- -D warnings
+
+  build_and_test:
+    name: Rust project
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['macos-latest', 'ubuntu-20.04', 'ubuntu-18.04', 'windows-latest']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --all-features
+      - uses: actions/upload-artifact@v2
+        with:
+          name: heatmap ${{ matrix.os }}
+          path: |
+            target/release/heatmap
+            target/release/heatmap.exe
