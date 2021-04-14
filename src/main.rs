@@ -17,8 +17,8 @@ fn heatmap(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
     let maps = draw::colormaps();
     let settings = draw::DrawSettings{
         colormap: maps[colormap],
-        power_min: power_min,
-        power_max: power_max,
+        power_min,
+        power_max,
         hide_axes: matches.is_present("hide_axes"),
     };
     draw::draw_image(&rc, output_path, &settings)?;
@@ -35,7 +35,7 @@ fn main() {
              .required(true))
         .arg(Arg::with_name("colormap")
              .long("colormap")
-             .possible_values(&draw::colormaps().keys().map(|&x| x).collect::<Vec<_>>())
+             .possible_values(&draw::colormaps().keys().copied().collect::<Vec<_>>())
              .default_value("viridis"))
         .arg(Arg::with_name("hide_axes")
                   .help("Hide axes")
