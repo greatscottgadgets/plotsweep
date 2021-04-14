@@ -16,7 +16,7 @@ fn heatmap(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
     let rc = csv::load_records(input_path)?;
     let maps = draw::colormaps();
     let settings = draw::DrawSettings{
-        colormap: &maps[colormap],
+        colormap: maps[colormap],
         power_min: power_min,
         power_max: power_max,
         hide_axes: matches.is_present("hide_axes"),

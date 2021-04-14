@@ -1,44 +1,35 @@
 use std::error::Error;
+
 use std::collections::HashMap;
 
 use chrono::naive::NaiveDateTime;
 use super::coord::IntoReversedAxis;
 use plotters::{chart::ChartBuilder, prelude::{BitMapBackend, IntoDrawingArea, LabelAreaPosition, RangedDateTime}, style::{WHITE}};
-pub use scarlet::colormap::{ColorMap, ListedColorMap};
+pub use colorous::Gradient;
 
 use super::csv::RecordCollection;
 
-pub struct DrawSettings<'a> {
-    pub colormap: &'a Box<dyn MyColorMap>,
+pub struct DrawSettings {
+    pub colormap: Gradient,
     pub power_min: f32,
     pub power_max: f32,
     pub hide_axes: bool,
 }
 
-pub trait MyColorMap {
-    fn transform_single(&self, _: f64) -> scarlet::color::RGBColor;
-}
-
-impl MyColorMap for ListedColorMap {
-    fn transform_single(&self, x: f64) -> scarlet::color::RGBColor {
-        scarlet::colormap::ColorMap::transform_single(self, x)
-    }
-}
-
-pub fn colormaps() -> HashMap<&'static str, Box<dyn MyColorMap>> {
-    let mut maps: HashMap<&'static str, Box<dyn MyColorMap>> = HashMap::new();
-    maps.insert("viridis", Box::new(ListedColorMap::viridis()));
-    maps.insert("magma",   Box::new(ListedColorMap::magma()));
-    maps.insert("inferno", Box::new(ListedColorMap::inferno()));
-    maps.insert("plasma",  Box::new(ListedColorMap::plasma()));
+pub fn colormaps() -> HashMap<&'static str, Gradient> {
+    let mut maps: HashMap<&'static str, Gradient> = HashMap::new();
+    maps.insert("viridis", colorous::VIRIDIS);
+    maps.insert("magma",   colorous::MAGMA);
+    maps.insert("inferno", colorous::INFERNO);
+    maps.insert("plasma",  colorous::PLASMA);
     maps
 }
 
-fn build_lut(colormap: &Box<dyn MyColorMap>) -> Vec<plotters::style::RGBColor> {
+fn build_lut(colormap: &Gradient) -> Vec<plotters::style::RGBColor> {
     let mut lut = Vec::with_capacity(u16::MAX as usize + 1);
     for i in 0..u16::MAX as usize + 1 {
-        let value = colormap.transform_single(i as f64 / u16::MAX as f64);
-        lut.push(plotters::style::RGBColor{0: value.int_r(), 1: value.int_g(), 2: value.int_b()});
+        let value = colormap.eval_continuous(i as f64 / u16::MAX as f64);
+        lut.push(plotters::style::RGBColor{0: value.r, 1: value.g, 2: value.b});
     }
     lut
 }
@@ -87,7 +78,7 @@ pub fn draw_image(record_collection: &RecordCollection, output_path: &str, setti
         chart.plotting_area().strip_coord_spec()
     };
 
-    let lut = build_lut(settings.colormap);
+    let lut = build_lut(&settings.colormap);
     let range = settings.power_max - settings.power_min;
     let scale = (lut.len()-1) as f32 / range;
 

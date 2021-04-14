@@ -9,7 +9,8 @@ edition = "2018"
 [dependencies]
 chrono = "*"
 clap = "2"
+colorous = "1.0"
 csv = "1.1"
+lazy_static = "1.4"
 plotters = "0.3"
-scarlet = "1.1"
 serde = { version = "1", features = ["derive"] }
