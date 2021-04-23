@@ -39,7 +39,6 @@ pub fn draw_image(record_collection: &RecordCollection, output_path: &str, setti
 
     let width = ((rc.freq_high - rc.freq_low) as f32 / rc.freq_step) as u32;
     let height = rc.timestamps.len() as u32;
-    println!("Width: {} Height: {}", width, height);
 
     let margins = if settings.hide_axes {
         (0, 0)

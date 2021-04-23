@@ -60,7 +60,6 @@ pub fn load_records(input_path: &str) -> Result<RecordCollection, Box<dyn Error>
 
     // Loop through all lines & parse records
     // also keep track of frequency range & unique timestamps to determine final image size
-    println!("Loading records...");
     let mut step: Option<f32> = None;
     let mut timestamps = HashSet::new();
     for result in rdr.deserialize() {
