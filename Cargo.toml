@@ -1,7 +1,15 @@
 [package]
 name = "plotsweep"
 version = "0.1.0"
+
 authors = ["Mike Walters <mike@flomp.net>"]
+categories = ["command-line-utilities"]
+description = "A tool to plot spectrogram images using hackrf_sweep, soapy_power, or rtl_power output."
+homepage = "https://github.com/greatscottgadgets/plotsweep/"
+keywords = ["spectrogram", "hackrf", "sweep", "sdr", "radio"]
+license = "BSD-3-Clause"
+repository = "https://github.com/greatscottgadgets/plotsweep/"
+
 edition = "2018"
 
 [dependencies]
