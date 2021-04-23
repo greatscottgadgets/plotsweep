@@ -70,6 +70,7 @@ pub fn draw_image(record_collection: &RecordCollection, output_path: &str, setti
             .build_cartesian_2d::<_, _>(rc.freq_low..rc.freq_high, y_axis)?;
         chart
             .configure_mesh()
+            .disable_mesh()
             .x_desc("Frequency (MHz)")
             .x_label_formatter(&|&x| (x as f32/1e6).round().to_string())
             .draw()?;
