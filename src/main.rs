@@ -6,7 +6,7 @@ mod csv;
 mod draw;
 mod coord;
 
-fn heatmap(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
+fn plot(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
     let input_path = matches.value_of("INPUT").unwrap();
     let output_path = matches.value_of("OUTPUT").unwrap();
     let power_min = value_t!(matches, "power-min", f32).unwrap_or_else(|e| e.exit());
@@ -26,8 +26,8 @@ fn heatmap(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
 }
 
 fn main() {
-    let matches = App::new("heatmap")
-        .about("Plots spectrogram from hackrf_sweep, soapy_power, or rtl_power output.")
+    let matches = App::new("plotsweep")
+        .about("Plots a spectrogram using hackrf_sweep, soapy_power, or rtl_power output.")
         .version(crate_version!())
         .arg(Arg::with_name("INPUT")
              .required(true))
@@ -53,8 +53,8 @@ fn main() {
              .default_value("-30"))
         .get_matches();
 
-    if let Err(err) = heatmap(&matches) {
-        println!("error running heatmap: {}", err);
+    if let Err(err) = plot(&matches) {
+        println!("error: {}", err);
         process::exit(1);
     }
 }

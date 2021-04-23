@@ -1,13 +1,11 @@
 [package]
-name = "heatmap"
+name = "plotsweep"
 version = "0.1.0"
 authors = ["Mike Walters <mike@flomp.net>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-chrono = "*"
+chrono = "0.4"
 clap = "2"
 colorous = "1.0"
 csv = "1.1"
