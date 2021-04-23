@@ -40,13 +40,17 @@ pub fn draw_image(record_collection: &RecordCollection, output_path: &str, setti
     let width = ((rc.freq_high - rc.freq_low) as f32 / rc.freq_step) as u32;
     let height = rc.timestamps.len() as u32;
 
-    let margins = if settings.hide_axes {
+    // Add some margin to space out the top/bottom axis labels from the edge of the image.
+    let vertical_margin = 10;
+
+    // Make space to draw the axis labels, if enabled.
+    let padding = if settings.hide_axes {
         (0, 0)
     } else {
-        (150, 40)
+        (150, 50 + vertical_margin)
     };
 
-    let b = BitMapBackend::new(output_path, (width+margins.0*2, height+margins.1*2))
+    let b = BitMapBackend::new(output_path, (width+padding.0*2, height+padding.1*2))
         .into_drawing_area();
     b.fill(&WHITE)?;
 
@@ -63,10 +67,12 @@ pub fn draw_image(record_collection: &RecordCollection, output_path: &str, setti
         let y_axis = RangedDateTime::from(ts_range).reversed_axis();
 
         let mut chart = ChartBuilder::on(&b)
-            .set_label_area_size(LabelAreaPosition::Left, margins.0)
-            .set_label_area_size(LabelAreaPosition::Right, margins.0)
-            .set_label_area_size(LabelAreaPosition::Top, margins.1)
-            .set_label_area_size(LabelAreaPosition::Bottom, margins.1)
+            .margin_top(vertical_margin)
+            .margin_bottom(vertical_margin)
+            .set_label_area_size(LabelAreaPosition::Left, padding.0)
+            .set_label_area_size(LabelAreaPosition::Right, padding.0)
+            .set_label_area_size(LabelAreaPosition::Top, padding.1-vertical_margin)
+            .set_label_area_size(LabelAreaPosition::Bottom, padding.1-vertical_margin)
             .build_cartesian_2d::<_, _>(rc.freq_low..rc.freq_high, y_axis)?;
         chart
             .configure_mesh()
