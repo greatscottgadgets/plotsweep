@@ -4,7 +4,7 @@
 
 ## Installation
 
-1. Install Rust. The simplest option is to use [rustup](https://rustup.rs).
+1. Install Rust >= 1.41. See here for options: https://www.rust-lang.org/tools/install
 2. Use `cargo` to install `plotsweep`:
 ```
 cargo install plotsweep

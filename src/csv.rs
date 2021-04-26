@@ -56,7 +56,7 @@ pub fn load_records(input_path: &str) -> Result<RecordCollection, Box<dyn Error>
         .trim(csv::Trim::All)
         .from_reader(input);
 
-    let mut rc = RecordCollection{ freq_low: u64::MAX, ..Default::default() };
+    let mut rc = RecordCollection{ freq_low: std::u64::MAX, ..Default::default() };
 
     // Loop through all lines & parse records
     // also keep track of frequency range & unique timestamps to determine final image size
@@ -72,7 +72,7 @@ pub fn load_records(input_path: &str) -> Result<RecordCollection, Box<dyn Error>
         rc.freq_low = std::cmp::min(rc.freq_low, record.freq_low);
         rc.freq_high = std::cmp::max(rc.freq_high, record.freq_high);
         if let Some(s) = step {
-            if (s - record.freq_step).abs() > f32::EPSILON {
+            if (s - record.freq_step).abs() > std::f32::EPSILON {
                 return Err("Frequency step must be constant".into());
             }
         } else {

@@ -26,9 +26,9 @@ pub fn colormaps() -> HashMap<&'static str, Gradient> {
 }
 
 fn build_lut(colormap: &Gradient) -> Vec<plotters::style::RGBColor> {
-    let mut lut = Vec::with_capacity(u16::MAX as usize + 1);
-    for i in 0..u16::MAX as usize + 1 {
-        let value = colormap.eval_continuous(i as f64 / u16::MAX as f64);
+    let mut lut = Vec::with_capacity(std::u16::MAX as usize + 1);
+    for i in 0..std::u16::MAX as usize + 1 {
+        let value = colormap.eval_continuous(i as f64 / std::u16::MAX as f64);
         lut.push(plotters::style::RGBColor{0: value.r, 1: value.g, 2: value.b});
     }
     lut
@@ -88,12 +88,26 @@ pub fn draw_image(record_collection: &RecordCollection, output_path: &str, setti
     let range = settings.power_max - settings.power_min;
     let scale = (lut.len()-1) as f32 / range;
 
+    // Note: this can be dropped once we're ok with requiring >= Rust 1.50
+    fn clamp(value: f32, min: f32, max: f32) -> f32
+    {
+        assert!(min <= max);
+        if value < min {
+            min
+        } else if value > max {
+            max
+        } else {
+            value
+        }
+    }
+
     for record in &rc.records {
         let mut x = (((record.freq_low - rc.freq_low) as f32 / rc.freq_step) + 0.5) as u32;
         let y = rc.timestamps[&NaiveDateTime::new(record.date, record.time)];
         for sample in &record.samples {
             let scaled_pixel = (sample - settings.power_min) * scale;
-            let value = &lut[(scaled_pixel as usize).clamp(0, lut.len()-1)];
+            let index = clamp(scaled_pixel, 0f32, (lut.len()-1) as f32) as usize;
+            let value = &lut[index];
             plot_area.draw_pixel((x as i32, y as i32), value)?;
             x += 1;
         }
