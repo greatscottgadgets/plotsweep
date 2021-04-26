@@ -27,7 +27,7 @@ fn plot(matches: &ArgMatches) -> Result<(), Box<dyn Error>> {
 
 fn main() {
     let matches = App::new("plotsweep")
-        .about("Plots a spectrogram using hackrf_sweep, soapy_power, or rtl_power output.")
+        .about("A tool to plot spectrogram images using hackrf_sweep, soapy_power, or rtl_power output.")
         .version(crate_version!())
         .arg(Arg::with_name("INPUT")
              .required(true))
