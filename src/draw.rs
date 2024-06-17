@@ -26,9 +26,9 @@ pub fn colormaps() -> HashMap<&'static str, Gradient> {
 }
 
 fn build_lut(colormap: &Gradient) -> Vec<plotters::style::RGBColor> {
-    let mut lut = Vec::with_capacity(std::u16::MAX as usize + 1);
-    for i in 0..std::u16::MAX as usize + 1 {
-        let value = colormap.eval_continuous(i as f64 / std::u16::MAX as f64);
+    let mut lut = Vec::with_capacity(u16::MAX as usize + 1);
+    for i in 0..u16::MAX as usize + 1 {
+        let value = colormap.eval_continuous(i as f64 / u16::MAX as f64);
         lut.push(plotters::style::RGBColor(value.r, value.g, value.b));
     }
     lut
