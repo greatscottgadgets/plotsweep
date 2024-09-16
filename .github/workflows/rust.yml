@@ -16,20 +16,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Install stable components
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-          components: clippy
+      - name: Install toolchain
+        run: |
+          rustup toolchain install stable
+          rustup default stable
 
       - name: Run clippy
-        uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --verbose --release -- -D warnings
+        run: cargo clippy -- --deny warnings
 
   build_and_test:
     name: Rust project
@@ -40,20 +35,19 @@ jobs:
         rust: ['stable']
         include:
           - os: 'ubuntu-20.04'
-            rust: '1.41'
+            rust: '1.63'
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+      - name: Install toolchain
+        run: |
+          rustup toolchain install ${{ matrix.rust }}
+          rustup default ${{ matrix.rust }}
+      - name: Build
+        run: cargo build --release
+      - uses: actions/upload-artifact@v4
         with:
-          toolchain: ${{ matrix.rust }}
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --all-features
-      - uses: actions/upload-artifact@v2
-        with:
-          name: plotsweep ${{ matrix.os }}
+          name: plotsweep ${{ matrix.os }} rust-${{ matrix.rust }}
           path: |
             target/release/plotsweep
             target/release/plotsweep.exe
