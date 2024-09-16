@@ -40,7 +40,7 @@ jobs:
         rust: ['stable']
         include:
           - os: 'ubuntu-20.04'
-            rust: '1.41'
+            rust: '1.63'
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
