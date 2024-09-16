@@ -51,9 +51,9 @@ jobs:
         with:
           command: build
           args: --release --all-features
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
-          name: plotsweep ${{ matrix.os }}
+          name: plotsweep ${{ matrix.os }} rust-${{ matrix.rust }}
           path: |
             target/release/plotsweep
             target/release/plotsweep.exe
