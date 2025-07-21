@@ -1,6 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
 use std::fs::File;
+use std::io::Read;
 
 use chrono::naive::{NaiveDateTime, NaiveDate, NaiveTime};
 use serde::Deserialize;
@@ -51,7 +52,12 @@ mod custom_time {
 }
 
 pub fn load_records(input_path: &str) -> Result<RecordCollection, Box<dyn Error>> {
-    let input = File::open(input_path)?;
+    let input: Box<dyn Read> = if input_path != "-" {
+        Box::new(File::open(input_path)?)
+    } else {
+        Box::new(std::io::stdin())
+    };
+
     let mut rdr = csv::ReaderBuilder::new()
         .has_headers(false)
         .trim(csv::Trim::All)
